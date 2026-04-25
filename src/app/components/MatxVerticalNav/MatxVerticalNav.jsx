@@ -6,6 +6,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import styled from "@mui/material/styles/styled";
 
 import useSettings from "app/hooks/useSettings";
+import useLanguage from "app/hooks/useLanguage";
 import { Paragraph, Span } from "../Typography";
 import MatxVerticalNavExpansionPanel from "./MatxVerticalNavExpansionPanel";
 
@@ -81,20 +82,33 @@ const BadgeValue = styled("div")(() => ({
 
 export default function MatxVerticalNav({ items }) {
   const { settings } = useSettings();
+  const { t } = useLanguage();
   const { mode } = settings.layout1Settings.leftSidebar;
+
+  const getTranslatedText = (item) => {
+    if (item.translationKey) {
+      const translated = t(item.translationKey);
+      return translated === item.translationKey ? item.name || item.label : translated;
+    }
+    return item.name || item.label;
+  };
 
   const renderLevels = (data) => {
     return data.map((item, index) => {
       if (item.type === "label")
         return (
           <ListLabel key={index} mode={mode} className="sidenavHoverShow">
-            {item.label}
+            {getTranslatedText(item)}
           </ListLabel>
         );
 
       if (item.children) {
         return (
-          <MatxVerticalNavExpansionPanel mode={mode} item={item} key={index}>
+          <MatxVerticalNavExpansionPanel
+            mode={mode}
+            item={{ ...item, displayName: getTranslatedText(item) }}
+            key={index}
+          >
             {renderLevels(item.children)}
           </MatxVerticalNavExpansionPanel>
         );
@@ -105,7 +119,8 @@ export default function MatxVerticalNav({ items }) {
             href={item.path}
             className={`${mode === "compact" && "compactNavItem"}`}
             rel="noopener noreferrer"
-            target="_blank">
+            target="_blank"
+          >
             <ButtonBase key={item.name} name="child" sx={{ width: "100%" }}>
               {(() => {
                 if (item.icon) {
@@ -115,7 +130,7 @@ export default function MatxVerticalNav({ items }) {
                 }
               })()}
               <StyledText mode={mode} className="sidenavHoverShow">
-                {item.name}
+                {getTranslatedText(item)}
               </StyledText>
               <Box mx="auto"></Box>
               {item.badge && <BadgeValue>{item.badge.value}</BadgeValue>}
@@ -131,7 +146,8 @@ export default function MatxVerticalNav({ items }) {
                 isActive
                   ? `navItemActive ${mode === "compact" && "compactNavItem"}`
                   : `${mode === "compact" && "compactNavItem"}`
-              }>
+              }
+            >
               <ButtonBase key={item.name} name="child" sx={{ width: "100%" }}>
                 {item?.icon ? (
                   <Icon className="icon" sx={{ width: 36 }}>
@@ -149,13 +165,14 @@ export default function MatxVerticalNav({ items }) {
                         ml: "20px",
                         fontSize: "11px",
                         display: mode !== "compact" && "none"
-                      }}>
+                      }}
+                    >
                       {item.iconText}
                     </Box>
                   </Fragment>
                 )}
                 <StyledText mode={mode} className="sidenavHoverShow">
-                  {item.name}
+                  {getTranslatedText(item)}
                 </StyledText>
 
                 <Box mx="auto" />

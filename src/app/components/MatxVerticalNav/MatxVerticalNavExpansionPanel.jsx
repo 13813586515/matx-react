@@ -83,7 +83,8 @@ export default function MatxVerticalNavExpansionPanel({ item, children, mode }) 
   const elementRef = useRef(null);
   const componentHeight = useRef(0);
   const { pathname } = useLocation();
-  const { name, icon, iconText, badge } = item;
+  const { name, displayName, icon, iconText, badge } = item;
+  const showName = displayName || name;
 
   const handleClick = () => {
     componentHeight.current = 0;
@@ -128,7 +129,7 @@ export default function MatxVerticalNavExpansionPanel({ item, children, mode }) 
         <Box display="flex" alignItems="center">
           {icon && <Icon className="icon">{icon}</Icon>}
           {iconText && <BulletIcon />}
-          <ItemText className="sidenavHoverShow">{name}</ItemText>
+          <ItemText className="sidenavHoverShow">{showName}</ItemText>
         </Box>
 
         {badge && <BadgeValue className="sidenavHoverShow itemIcon">{badge.value}</BadgeValue>}
