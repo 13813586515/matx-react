@@ -13,6 +13,8 @@ import materialRoutes from "app/views/material-kit/MaterialRoutes";
 const AppEchart = Loadable(lazy(() => import("app/views/charts/echarts/AppEchart")));
 // DASHBOARD PAGE
 const Analytics = Loadable(lazy(() => import("app/views/dashboard/Analytics")));
+// PERMISSION MANAGEMENT PAGE
+const PermissionManagement = Loadable(lazy(() => import("app/views/permissions/PermissionManagement")));
 
 const routes = [
   { path: "/", element: <Navigate to="dashboard/default" /> },
@@ -27,7 +29,9 @@ const routes = [
       // dashboard route
       { path: "/dashboard/default", element: <Analytics />, auth: authRoles.admin },
       // e-chart route
-      { path: "/charts/echarts", element: <AppEchart />, auth: authRoles.editor }
+      { path: "/charts/echarts", element: <AppEchart />, auth: authRoles.editor },
+      // permission management route (only super admin)
+      { path: "/permissions/management", element: <PermissionManagement />, auth: authRoles.sa }
     ]
   },
 
