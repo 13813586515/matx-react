@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
@@ -18,14 +18,12 @@ import Search from "@mui/icons-material/Search";
 import Close from "@mui/icons-material/Close";
 import Dashboard from "@mui/icons-material/Dashboard";
 import Pages from "@mui/icons-material/Description";
-import AccountCircle from "@mui/icons-material/AccountCircle";
 import Security from "@mui/icons-material/Security";
 import BarChart from "@mui/icons-material/BarChart";
 import Widgets from "@mui/icons-material/Widgets";
 
 import useLanguage from "app/hooks/useLanguage";
 import useGlobalSearch from "app/hooks/useGlobalSearch";
-import useAuth from "app/hooks/useAuth";
 import navigations from "app/navigations";
 
 const flattenNavigations = (items, parentLabel = null) => {
@@ -50,13 +48,6 @@ const flattenNavigations = (items, parentLabel = null) => {
 
 const staticMenuItems = flattenNavigations(navigations);
 
-const mockUsers = [
-  { id: 1, name: "Jason Alexander", email: "jason@ui-lib.com", role: "SA", avatar: "/assets/images/face-6.jpg" },
-  { id: 2, name: "John Doe", email: "john@example.com", role: "ADMIN", avatar: "/assets/images/face-1.jpg" },
-  { id: 3, name: "Jane Smith", email: "jane@example.com", role: "EDITOR", avatar: "/assets/images/face-2.jpg" },
-  { id: 4, name: "Bob Wilson", email: "bob@example.com", role: "GUEST", avatar: "/assets/images/face-3.jpg" }
-];
-
 const getIconComponent = (iconName) => {
   const iconMap = {
     dashboard: Dashboard,
@@ -71,14 +62,13 @@ const getIconComponent = (iconName) => {
 export default function GlobalSearchModal() {
   const { t } = useLanguage();
   const { isOpen, closeSearch } = useGlobalSearch();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const searchTimerRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searching, setSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState({ menus: [], users: [], pages: [] });
+  const [searchResults, setSearchResults] = useState({ menus: [], pages: [] });
 
   const getTranslatedText = useCallback(
     (item) => {
@@ -86,7 +76,7 @@ export default function GlobalSearchModal() {
         const translated = t(item.translationKey);
         return translated === item.translationKey ? item.name : translated;
       }
-      return item.name || item.email;
+      return item.name;
     },
     [t]
   );
@@ -98,7 +88,7 @@ export default function GlobalSearchModal() {
       }
 
       if (!query.trim()) {
-        setSearchResults({ menus: [], users: [], pages: [] });
+        setSearchResults({ menus: [], pages: [] });
         setSelectedIndex(0);
         return;
       }
@@ -111,11 +101,6 @@ export default function GlobalSearchModal() {
         const filteredMenus = staticMenuItems.filter((item) =>
           getTranslatedText(item).toLowerCase().includes(lowerQuery) ||
           item.path.toLowerCase().includes(lowerQuery)
-        );
-
-        const filteredUsers = mockUsers.filter((user) =>
-          user.name.toLowerCase().includes(lowerQuery) ||
-          user.email.toLowerCase().includes(lowerQuery)
         );
 
         const filteredPages = [];
@@ -131,7 +116,6 @@ export default function GlobalSearchModal() {
 
         setSearchResults({
           menus: filteredMenus,
-          users: filteredUsers,
           pages: filteredPages
         });
         setSelectedIndex(0);
@@ -157,14 +141,14 @@ export default function GlobalSearchModal() {
     if (!isOpen) {
       setSearchQuery("");
       setSelectedIndex(0);
-      setSearchResults({ menus: [], users: [], pages: [] });
+      setSearchResults({ menus: [], pages: [] });
       setSearching(false);
     }
   }, [isOpen]);
 
   const handleKeyDown = (e) => {
     const totalResults =
-      searchResults.menus.length + searchResults.users.length + searchResults.pages.length;
+      searchResults.menus.length + searchResults.pages.length;
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -195,12 +179,6 @@ export default function GlobalSearchModal() {
       closeSearch();
       return;
     }
-    currentIndex += searchResults.menus.length;
-
-    if (currentIndex + searchResults.users.length > index) {
-      closeSearch();
-      return;
-    }
   };
 
   const handleItemClick = (item) => {
@@ -210,28 +188,7 @@ export default function GlobalSearchModal() {
     closeSearch();
   };
 
-  const getAllResults = () => {
-    const results = [];
-    let index = 0;
-
-    searchResults.pages.forEach((item) => {
-      results.push({ ...item, listIndex: index++ });
-    });
-
-    searchResults.menus.forEach((item) => {
-      results.push({ ...item, listIndex: index++ });
-    });
-
-    searchResults.users.forEach((item) => {
-      results.push({ ...item, listIndex: index++ });
-    });
-
-    return results;
-  };
-
   const renderSearchResults = () => {
-    const allResults = getAllResults();
-
     if (!searchQuery.trim()) {
       return (
         <Box sx={{ p: 3, textAlign: "center", color: "text.secondary" }}>
@@ -253,7 +210,9 @@ export default function GlobalSearchModal() {
       );
     }
 
-    if (allResults.length === 0) {
+    const totalResults = searchResults.pages.length + searchResults.menus.length;
+
+    if (totalResults === 0) {
       return (
         <Box sx={{ p: 3, textAlign: "center", color: "text.secondary" }}>
           <Typography variant="body1">
@@ -319,35 +278,6 @@ export default function GlobalSearchModal() {
                     primary={getTranslatedText(item)}
                     secondary={item.path}
                   />
-                </ListItemButton>
-              );
-            })}
-          </>
-        )}
-
-        {searchResults.users.length > 0 && (
-          <>
-            {(searchResults.pages.length > 0 || searchResults.menus.length > 0) && <Divider />}
-            <ListItem sx={{ py: 1, px: 2, bgcolor: "background.default" }}>
-              <Chip size="small" label={t("search.categories.users")} color="info" />
-            </ListItem>
-            {searchResults.users.map((item, idx) => {
-              const listIndex = searchResults.pages.length + searchResults.menus.length + idx;
-              return (
-                <ListItemButton
-                  key={`user-${item.id}`}
-                  onClick={() => handleItemClick(item)}
-                  selected={listIndex === selectedIndex}
-                  sx={{ py: 1.5 }}
-                >
-                  <ListItemIcon>
-                    <AccountCircle />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.name}
-                    secondary={item.email}
-                  />
-                  <Chip size="small" label={item.role} variant="outlined" />
                 </ListItemButton>
               );
             })}

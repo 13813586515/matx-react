@@ -25,6 +25,12 @@ function AppContent() {
   );
 }
 
+const snackbarStyles = {
+  root: {
+    zIndex: 99999999
+  }
+};
+
 export default function App() {
   return (
     <SettingsProvider>
@@ -32,7 +38,14 @@ export default function App() {
         <PermissionProvider>
           <GlobalSearchProvider>
             <AuthProvider>
-              <SnackbarProvider maxSnack={3}>
+              <SnackbarProvider
+                maxSnack={3}
+                style={{ zIndex: 99999999 }}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right"
+                }}
+              >
                 <MatxTheme>
                   <CssBaseline />
                   <AppContent />
