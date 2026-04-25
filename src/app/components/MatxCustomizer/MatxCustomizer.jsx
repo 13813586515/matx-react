@@ -29,14 +29,18 @@ import { themeShadows } from "../MatxTheme/themeColors";
 import { borderRadiusOptions, shadowLevelOptions } from "../MatxTheme/initThemes";
 
 const Label = styled(Span)(({ theme }) => ({
+  position: "fixed",
+  right: 0,
+  top: "50%",
+  transform: "translateY(-50%) rotate(90deg)",
+  transformOrigin: "center center",
+  zIndex: 9999,
   fontWeight: 700,
   fontSize: "1rem",
   cursor: "pointer",
-  borderRadius: "4px",
-  marginBottom: "2.5rem",
+  borderRadius: "4px 4px 0 0",
   letterSpacing: "1.5px",
-  padding: ".25rem .5rem",
-  transform: "rotate(90deg)",
+  padding: ".5rem 2rem",
   color: theme.palette.secondary.main,
   backgroundColor: theme.palette.primary.dark,
   "&:hover, &.open": {
