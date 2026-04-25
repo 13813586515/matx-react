@@ -27,11 +27,17 @@ const navigations = [
       { name: "Menu", path: "/material/menu", iconText: "M" },
       { name: "Progress", path: "/material/progress", iconText: "P" },
       { name: "Radio", path: "/material/radio", iconText: "R" },
+      { name: "Skeleton", path: "/material/skeleton", iconText: "SK" },
       { name: "Switch", path: "/material/switch", iconText: "S" },
       { name: "Slider", path: "/material/slider", iconText: "S" },
       { name: "Snackbar", path: "/material/snackbar", iconText: "S" },
       { name: "Table", path: "/material/table", iconText: "T" }
     ]
+  },
+  {
+    name: "Form Builder",
+    icon: "dynamic_form",
+    path: "/form-builder"
   },
   {
     name: "Charts",
