@@ -236,7 +236,7 @@ function DateFieldComponent({ field, form, label, helperText, ...props }) {
 }
 
 export function FormField({ fieldConfig, ...props }) {
-  const { type, name, label, ...rest } = fieldConfig;
+  const { type, name, label, size, group, ...rest } = fieldConfig;
   
   switch (type) {
     case fieldTypes.text:
