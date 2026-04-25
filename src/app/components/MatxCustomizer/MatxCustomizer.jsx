@@ -4,7 +4,7 @@ import Close from "@mui/icons-material/Close";
 import Settings from "@mui/icons-material/Settings";
 import Palette from "@mui/icons-material/Palette";
 import RoundedCorner from "@mui/icons-material/RoundedCorner";
-import Shadow from "@mui/icons-material/Shadow";
+import BlurOn from "@mui/icons-material/BlurOn";
 import ResetIcon from "@mui/icons-material/RestartAlt";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -236,7 +236,7 @@ export default function MatxCustomizer() {
                 sx={{ minHeight: 48 }}>
                 <Tab icon={<Palette />} label="Themes" iconPosition="start" sx={{ minHeight: 48 }} />
                 <Tab icon={<RoundedCorner />} label="Style" iconPosition="start" sx={{ minHeight: 48 }} />
-                <Tab icon={<Shadow />} label="Layouts" iconPosition="start" sx={{ minHeight: 48 }} />
+                <Tab icon={<BlurOn />} label="Layouts" iconPosition="start" sx={{ minHeight: 48 }} />
               </Tabs>
             </Box>
 
