@@ -36,7 +36,7 @@ const navigations = [
   },
   {
     name: "Form Builder",
-    icon: "dynamic_form",
+    icon: "edit_note",
     path: "/form-builder"
   },
   {
