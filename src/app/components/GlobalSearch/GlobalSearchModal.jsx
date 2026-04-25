@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
@@ -48,6 +48,8 @@ const flattenNavigations = (items, parentLabel = null) => {
   return result;
 };
 
+const staticMenuItems = flattenNavigations(navigations);
+
 const mockUsers = [
   { id: 1, name: "Jason Alexander", email: "jason@ui-lib.com", role: "SA", avatar: "/assets/images/face-6.jpg" },
   { id: 2, name: "John Doe", email: "john@example.com", role: "ADMIN", avatar: "/assets/images/face-1.jpg" },
@@ -72,66 +74,80 @@ export default function GlobalSearchModal() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const inputRef = useRef(null);
+  const searchTimerRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState({ menus: [], users: [], pages: [] });
 
-  const menuItems = flattenNavigations(navigations);
+  const getTranslatedText = useCallback(
+    (item) => {
+      if (item.translationKey) {
+        const translated = t(item.translationKey);
+        return translated === item.translationKey ? item.name : translated;
+      }
+      return item.name || item.email;
+    },
+    [t]
+  );
 
-  const getTranslatedText = (item) => {
-    if (item.translationKey) {
-      const translated = t(item.translationKey);
-      return translated === item.translationKey ? item.name : translated;
-    }
-    return item.name || item.email;
-  };
-
-  const performSearch = useCallback((query) => {
-    if (!query.trim()) {
-      setSearchResults({ menus: [], users: [], pages: [] });
-      setSelectedIndex(0);
-      return;
-    }
-
-    setSearching(true);
-
-    setTimeout(() => {
-      const lowerQuery = query.toLowerCase();
-
-      const filteredMenus = menuItems.filter((item) =>
-        getTranslatedText(item).toLowerCase().includes(lowerQuery) ||
-        item.path.toLowerCase().includes(lowerQuery)
-      );
-
-      const filteredUsers = mockUsers.filter((user) =>
-        user.name.toLowerCase().includes(lowerQuery) ||
-        user.email.toLowerCase().includes(lowerQuery)
-      );
-
-      const filteredPages = [];
-      if ("dashboard".includes(lowerQuery) || query.toLowerCase().includes("dash")) {
-        filteredPages.push({
-          type: "page",
-          name: "Analytics Dashboard",
-          translationKey: "dashboard.analytics",
-          path: "/dashboard/default",
-          icon: "dashboard"
-        });
+  const performSearch = useCallback(
+    (query) => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
       }
 
-      setSearchResults({
-        menus: filteredMenus,
-        users: filteredUsers,
-        pages: filteredPages
-      });
-      setSelectedIndex(0);
-      setSearching(false);
-    }, 200);
-  }, [t, menuItems]);
+      if (!query.trim()) {
+        setSearchResults({ menus: [], users: [], pages: [] });
+        setSelectedIndex(0);
+        return;
+      }
+
+      setSearching(true);
+
+      searchTimerRef.current = setTimeout(() => {
+        const lowerQuery = query.toLowerCase();
+
+        const filteredMenus = staticMenuItems.filter((item) =>
+          getTranslatedText(item).toLowerCase().includes(lowerQuery) ||
+          item.path.toLowerCase().includes(lowerQuery)
+        );
+
+        const filteredUsers = mockUsers.filter((user) =>
+          user.name.toLowerCase().includes(lowerQuery) ||
+          user.email.toLowerCase().includes(lowerQuery)
+        );
+
+        const filteredPages = [];
+        if ("dashboard".includes(lowerQuery) || query.toLowerCase().includes("dash")) {
+          filteredPages.push({
+            type: "page",
+            name: "Analytics Dashboard",
+            translationKey: "dashboard.analytics",
+            path: "/dashboard/default",
+            icon: "dashboard"
+          });
+        }
+
+        setSearchResults({
+          menus: filteredMenus,
+          users: filteredUsers,
+          pages: filteredPages
+        });
+        setSelectedIndex(0);
+        setSearching(false);
+      }, 200);
+    },
+    [getTranslatedText]
+  );
 
   useEffect(() => {
     performSearch(searchQuery);
+    return () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
   }, [searchQuery, performSearch]);
 
   useEffect(() => {
@@ -141,6 +157,8 @@ export default function GlobalSearchModal() {
     if (!isOpen) {
       setSearchQuery("");
       setSelectedIndex(0);
+      setSearchResults({ menus: [], users: [], pages: [] });
+      setSearching(false);
     }
   }, [isOpen]);
 
